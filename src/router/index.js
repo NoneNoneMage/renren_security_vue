@@ -71,6 +71,7 @@ router.beforeEach((to, from, next) => {
         fnAddDynamicMenuRoutes(data.menuList)
         router.options.isAddDynamicMenuRoutes = true
         sessionStorage.setItem('menuList', JSON.stringify(data.menuList || '[]'))
+        // debugger
         sessionStorage.setItem('permissions', JSON.stringify(data.permissions || '[]'))
         next({ ...to, replace: true })
       } else {
@@ -113,8 +114,10 @@ function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
       temp = temp.concat(menuList[i].list)
     } else if (menuList[i].url && /\S/.test(menuList[i].url)) {
       menuList[i].url = menuList[i].url.replace(/^\//, '')
+      // menuList[i].url = menuList[i].url.substring(0, menuList[i].url.indexOf('.html'))
       var route = {
         path: menuList[i].url.replace('/', '-'),
+        // path: menuList[i].url.substring(0, menuList[i].url.indexOf('.html')),
         component: null,
         name: menuList[i].url.replace('/', '-'),
         meta: {
@@ -132,7 +135,7 @@ function fnAddDynamicMenuRoutes (menuList = [], routes = []) {
         route['meta']['iframeUrl'] = menuList[i].url
       } else {
         try {
-          route['component'] = _import(`modules/${menuList[i].url}`) || null
+          route['component'] = _import(`${menuList[i].url.substring(0, menuList[i].url.indexOf('.html'))}`) || null
         } catch (e) {}
       }
       routes.push(route)

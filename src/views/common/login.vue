@@ -72,12 +72,25 @@
             this.$http({
               url: this.$http.adornUrl('/sys/login'),
               method: 'post',
-              data: this.$http.adornData({
+              data: {
                 'username': this.dataForm.userName,
                 'password': this.dataForm.password,
                 'uuid': this.dataForm.uuid,
                 'captcha': this.dataForm.captcha
-              })
+              },
+              transformRequest: [
+                function (data) {
+                  let ret = ''
+                  for (let it in data) {
+                    ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+                  }
+                  ret = ret.substring(0, ret.lastIndexOf('&'))
+                  return ret
+                }
+              ],
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              }
             }).then(({data}) => {
               if (data && data.code === 0) {
                 this.$cookie.set('token', data.token)
