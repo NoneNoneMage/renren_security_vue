@@ -26,7 +26,7 @@ const mainRoutes = {
   path: '/',
   component: _import('main'),
   name: 'main',
-  redirect: { name: 'home' },
+  redirect: { name: 'echarts' },
   meta: { title: '主入口整体布局' },
   children: [
     // 通过meta对象设置路由展示方式
@@ -35,8 +35,9 @@ const mainRoutes = {
     // 提示: 如需要通过iframe嵌套展示内容, 但不通过tab打开, 请自行创建组件使用iframe处理!
     { path: '/home', component: _import('common/home'), name: 'home', meta: { title: '首页' } },
     { path: '/theme', component: _import('common/theme'), name: 'theme', meta: { title: '主题' } },
-    { path: '/demo-echarts', component: _import('demo/echarts'), name: 'demo-echarts', meta: { title: 'demo-echarts', isTab: true } },
-    { path: '/demo-ueditor', component: _import('demo/ueditor'), name: 'demo-ueditor', meta: { title: 'demo-ueditor', isTab: true } }
+    { path: '/echarts', component: _import('demo/echarts'), name: 'echarts', meta: { title: '首页', isTab: false } },
+    { path: '/demo-ueditor', component: _import('demo/ueditor'), name: 'demo-ueditor', meta: { title: 'demo-ueditor', isTab: true } },
+    { path: '/restaurant-manage.html', component: _import('modules/sm/restaurant-manage'), name: 'restaurant-manage.html', meta: { title: '菜品管理', isTab: true } }
   ],
   beforeEnter (to, from, next) {
     let token = Vue.cookie.get('token')

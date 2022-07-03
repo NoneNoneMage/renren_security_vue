@@ -1,10 +1,13 @@
 <template>
-  <div class="mod-oss">
-    <el-form :inline="true" :model="dataForm">
+  <div class="mod-restaurant">
+    <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-button type="primary" @click="configHandle()">云存储配置</el-button>
-        <el-button type="primary" @click="uploadHandle()">上传文件</el-button>
-        <el-button type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-input v-model="dataForm.name" placeholder="门店名" clearable></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="getDataList()">查询</el-button>
+        <el-button v-if="isAuth('sm:restaurant:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <el-button v-if="isAuth('sm:restaurant:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -27,25 +30,34 @@
         label="ID">
       </el-table-column>
       <el-table-column
-        prop="url"
+        prop="name"
         header-align="center"
         align="center"
-        label="URL地址">
+        label="门店名">
       </el-table-column>
-       <el-table-column
+      <el-table-column
         prop="avatarUrl"
         header-align="center"
         align="center"
-        width="80"
-        label="预览">
+        label="门店头像">
         <template slot-scope="scope">
-          <viewer>
-            <img v-if="scope.row.url != ''" style="width:50px;height:50px;border:none;" :src="scope.row.url"/>
-          </viewer>
+           <viewer>
+            <img v-if="scope.row.avatarUrl != ''" style="width:50px;height:50px;border:none;" :src="scope.row.avatarUrl"/>
+           </viewer>
         </template>
       </el-table-column>
       <el-table-column
-        prop="createDate"
+        prop="status"
+        header-align="center"
+        align="center"
+        label="状态">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.status === 0" size="small" type="danger">禁用</el-tag>
+          <el-tag v-else size="small">正常</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
         header-align="center"
         align="center"
         width="180"
@@ -55,10 +67,12 @@
         fixed="right"
         header-align="center"
         align="center"
-        width="150"
+        width="350"
         label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
+          <el-button v-if="isAuth('sm:restaurant:manageGoods')" type="text" size="small" @click="manageGoods(scope.row.id, scope.row.name)">菜品管理</el-button>
+          <el-button v-if="isAuth('sm:restaurant:update')" type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
+          <el-button v-if="isAuth('sm:restaurant:delete')" type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -71,33 +85,30 @@
       :total="totalPage"
       layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
-    <!-- 弹窗, 云存储配置 -->
-    <config v-if="configVisible" ref="config"></config>
-    <!-- 弹窗, 上传文件 -->
-    <upload v-if="uploadVisible" ref="upload" @refreshDataList="getDataList"></upload>
+    <!-- 弹窗, 新增 / 修改 -->
+    <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>
 </template>
 
 <script>
-  import Config from './oss-config'
-  import Upload from './oss-upload'
+  import AddOrUpdate from './restaurant-add-or-update'
   export default {
     data () {
       return {
-        dataForm: {},
+        dataForm: {
+          name: ''
+        },
         dataList: [],
         pageIndex: 1,
         pageSize: 10,
         totalPage: 0,
         dataListLoading: false,
         dataListSelections: [],
-        configVisible: false,
-        uploadVisible: false
+        addOrUpdateVisible: false
       }
     },
     components: {
-      Config,
-      Upload
+      AddOrUpdate
     },
     activated () {
       this.getDataList()
@@ -107,11 +118,12 @@
       getDataList () {
         this.dataListLoading = true
         this.$http({
-          url: this.$http.adornUrl('/sys/oss/list'),
+          url: this.$http.adornUrl('/sm/restaurant/list'),
           method: 'get',
           params: this.$http.adornParams({
             'page': this.pageIndex,
-            'limit': this.pageSize
+            'limit': this.pageSize,
+            'name': this.dataForm.name
           })
         }).then(({data}) => {
           if (data && data.code === 0) {
@@ -139,34 +151,38 @@
       selectionChangeHandle (val) {
         this.dataListSelections = val
       },
-      // 云存储配置
-      configHandle () {
-        this.configVisible = true
+      // 新增 / 修改
+      addOrUpdateHandle (id) {
+        this.addOrUpdateVisible = true
         this.$nextTick(() => {
-          this.$refs.config.init()
+          this.$refs.addOrUpdate.init(id)
         })
       },
-      // 上传文件
-      uploadHandle () {
-        this.uploadVisible = true
-        this.$nextTick(() => {
-          this.$refs.upload.init()
+      // 管理餐馆菜单和菜品
+      manageGoods (id, name) {
+        this.$router.push({
+          name: 'restaurant-manage.html',
+          query: {
+            id: id,
+            name: name,
+            date: new Date().getTime()
+          }
         })
       },
       // 删除
       deleteHandle (id) {
-        var ids = id ? [id] : this.dataListSelections.map(item => {
+        var restaurantIds = id ? [id] : this.dataListSelections.map(item => {
           return item.id
         })
-        this.$confirm(`确定对[id=${ids.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+        this.$confirm(`确定对[id=${restaurantIds.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           this.$http({
-            url: this.$http.adornUrl('/sys/oss/delete'),
+            url: this.$http.adornUrl('/sm/restaurant/delete'),
             method: 'post',
-            data: this.$http.adornData(ids, false)
+            data: this.$http.adornData(restaurantIds, false)
           }).then(({data}) => {
             if (data && data.code === 0) {
               this.$message({

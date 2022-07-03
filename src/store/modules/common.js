@@ -16,7 +16,9 @@ export default {
     contentIsNeedRefresh: false,
     // 主入口标签页
     mainTabs: [],
-    mainTabsActiveName: ''
+    mainTabsActiveName: '',
+
+    folderActiveName: ''
   },
   mutations: {
     updateDocumentClientHeight (state, height) {
@@ -45,6 +47,9 @@ export default {
     },
     updateMainTabsActiveName (state, name) {
       state.mainTabsActiveName = name
+    },
+    updateFolderActiveName (state, name) {
+      state.folderActiveName = name
     }
   }
 }

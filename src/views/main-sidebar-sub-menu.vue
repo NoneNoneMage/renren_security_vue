@@ -4,7 +4,7 @@
     :index="menu.menuId + ''"
     :popper-class="'site-sidebar--' + sidebarLayoutSkin + '-popper'">
     <template slot="title">
-      <icon-svg :name="menu.icon || ''" class="site-sidebar__menu-icon"></icon-svg>
+      <icon-svg :name="menu.icon || 'admin'" class="site-sidebar__menu-icon"></icon-svg>
       <span>{{ menu.name }}</span>
     </template>
     <sub-menu

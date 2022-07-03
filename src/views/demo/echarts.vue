@@ -20,7 +20,7 @@
           <div id="J_chartBarBox" class="chart-box"></div>
         </el-card>
       </el-col>
-      <el-col :span="12">
+      <!-- <el-col :span="12">
         <el-card>
           <div id="J_chartPieBox" class="chart-box"></div>
         </el-card>
@@ -29,7 +29,7 @@
         <el-card>
           <div id="J_chartScatterBox" class="chart-box"></div>
         </el-card>
-      </el-col>
+      </el-col> -->
     </el-row>
   </div>
 </template>

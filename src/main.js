@@ -11,6 +11,16 @@ import httpRequest from '@/utils/httpRequest' // api: https://github.com/axios/a
 import { isAuth } from '@/utils'
 import cloneDeep from 'lodash/cloneDeep'
 
+import 'viewerjs/dist/viewer.css'
+import Viewer from 'v-viewer'
+ 
+Vue.use(Viewer)
+ 
+// 这里是插件的默认设置
+Viewer.setDefaults({
+　zIndexInline: 9999
+})
+
 Vue.use(VueCookie)
 Vue.config.productionTip = false
 

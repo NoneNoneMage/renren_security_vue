@@ -6,15 +6,16 @@
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="120px">
       <el-form-item size="mini" label="存储类型">
         <el-radio-group v-model="dataForm.type">
+          <el-radio :label="4">本地盘</el-radio>
           <el-radio :label="1">七牛</el-radio>
           <el-radio :label="2">阿里云</el-radio>
           <el-radio :label="3">腾讯云</el-radio>
         </el-radio-group>
       </el-form-item>
       <template v-if="dataForm.type === 1">
-        <el-form-item size="mini">
+        <!-- <el-form-item size="mini">
           <a href="http://www.renren.io/open/qiniu.html" target="_blank">免费申请(七牛)10GB储存空间</a>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="域名">
           <el-input v-model="dataForm.qiniuDomain" placeholder="七牛绑定的域名"></el-input>
         </el-form-item>
@@ -72,6 +73,11 @@
         </el-form-item>
         <el-form-item label="Bucket所属地区">
           <el-input v-model="dataForm.qcloudRegion" placeholder="如：sh（可选值 ，华南：gz 华北：tj 华东：sh）"></el-input>
+        </el-form-item>
+      </template>
+      <template v-else-if="dataForm.type === 4">
+        <el-form-item label="主机绝对路径">
+          <el-input v-model="dataForm.qdiskPath" placeholder="/tmp/files"></el-input>
         </el-form-item>
       </template>
     </el-form>
